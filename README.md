@@ -2,6 +2,19 @@
 
 Real-time video chat application with WebRTC, Socket.io, and MongoDB.
 
+## 🚀 Deploy 1-Click (Dễ nhất!)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+**Chỉ cần:**
+
+1. Click button trên
+2. Connect GitHub
+3. Điền MongoDB URI
+4. Done! 🎉
+
+Chi tiết: [DEPLOY-1-CLICK.md](./DEPLOY-1-CLICK.md)
+
 ## ✨ Features
 
 - 🎥 Multi-participant video calls (up to 10 users)
