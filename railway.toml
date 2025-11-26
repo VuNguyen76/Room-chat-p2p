@@ -1,4 +1,0 @@
-# Railway Configuration
-# Note: Railway doesn't support docker-compose directly
-# You need to create separate services for backend and frontend
-# This file is for reference only
