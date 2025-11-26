@@ -1,264 +1,243 @@
-# 🚂 Railway Deployment - Full Stack (1 Click)
+# 🚂 Railway Deployment - Correct Guide
 
-Railway là platform tốt nhất để deploy cả frontend + backend cùng lúc với Docker support và WebSocket.
+Railway **KHÔNG** hỗ trợ Docker Compose trực tiếp. Cần deploy 2 services riêng biệt.
 
-## ✨ Tại sao chọn Railway?
+## 🚀 Deploy đúng cách (10 phút)
 
-- ✅ Deploy cả FE + BE cùng lúc
-- ✅ Hỗ trợ Docker Compose
-- ✅ Hỗ trợ WebSocket/Socket.io
-- ✅ Free tier: 500 hours/month ($5 credit)
-- ✅ Auto SSL/HTTPS
-- ✅ Tự động detect và deploy
-- ✅ MongoDB plugin có sẵn
-- ✅ Logs và monitoring tốt
-
----
-
-## 🚀 Deploy trong 5 phút
-
-### Bước 1: Chuẩn bị
+### Bước 1: Tạo Project và Deploy Backend
 
 1. **Tạo tài khoản Railway**
 
    - Truy cập [railway.app](https://railway.app)
    - Sign up với GitHub
 
-2. **Push code lên GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for Railway deployment"
-   git push origin main
+2. **Create New Project**
+
+   - Click **"New Project"**
+   - Chọn **"Deploy from GitHub repo"**
+   - Chọn repository của bạn
+
+3. **Configure Backend Service**
+
+   - Railway sẽ hỏi root directory
+   - Chọn **"backend"** hoặc configure sau
+   - Nếu không hỏi, vào Settings → **Root Directory** → `backend`
+
+4. **Railway sẽ tự động:**
+   - Detect Dockerfile
+   - Build Docker image
+   - Deploy backend
+   - Tạo public URL
+
+### Bước 2: Add MongoDB
+
+1. Click **"New"** trong project
+2. Chọn **"Database"** → **"Add MongoDB"**
+3. Railway tự động tạo MongoDB instance
+4. Copy **Connection String** từ MongoDB Variables tab
+
+### Bước 3: Configure Backend Environment
+
+1. Vào **Backend service** → **Variables**
+2. Add variables:
    ```
+   MONGODB_URI=<paste-connection-string-from-step-2>
+   CORS_ORIGIN=*
+   NODE_ENV=production
+   PORT=5000
+   GRACE_PERIOD_MS=5000
+   ```
+3. Click **"Add"** cho mỗi variable
+4. Service sẽ tự động redeploy
 
-### Bước 2: Deploy
+### Bước 4: Generate Backend Domain
 
-**Option A: Deploy với Docker Compose (Recommended)**
+1. Vào Backend service → **Settings**
+2. Scroll xuống **Networking**
+3. Click **"Generate Domain"**
+4. Copy URL (vd: `https://your-backend.up.railway.app`)
+5. **LƯU LẠI URL NÀY** - cần cho frontend!
 
-1. Vào Railway Dashboard
-2. Click **"New Project"**
-3. Chọn **"Deploy from GitHub repo"**
-4. Chọn repository của bạn
-5. Railway sẽ tự động detect `docker-compose.yml`
-6. Click **"Deploy"**
+### Bước 5: Deploy Frontend
 
-Railway sẽ tự động:
+1. Trong cùng project, click **"New"**
+2. Chọn **"GitHub Repo"** → chọn cùng repo
+3. Configure:
+   - **Root Directory**: `frontend`
+   - Railway sẽ detect Dockerfile
 
-- Tạo 2 services (backend + frontend)
-- Build Docker images
-- Deploy cả 2 services
-- Tạo public URLs
+### Bước 6: Configure Frontend Environment
 
-**Option B: Deploy từng service riêng**
+1. Vào **Frontend service** → **Variables**
+2. Add variables (dùng backend URL từ Bước 4):
+   ```
+   VITE_API_URL=https://your-backend.up.railway.app
+   VITE_SOCKET_URL=https://your-backend.up.railway.app
+   VITE_APP_NAME=ERP Video Chat Room
+   VITE_APP_VERSION=1.0.0
+   VITE_DEV_MODE=false
+   VITE_LOG_LEVEL=error
+   VITE_STUN_SERVERS=stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302
+   ```
+3. Service sẽ tự động redeploy
 
-1. **Deploy Backend:**
+### Bước 7: Generate Frontend Domain
 
-   - New Project → Deploy from GitHub
-   - Chọn repo
-   - Root Directory: `backend`
-   - Railway auto-detect Node.js
-   - Deploy!
+1. Vào Frontend service → **Settings**
+2. **Networking** → **Generate Domain**
+3. Copy URL (vd: `https://your-frontend.up.railway.app`)
 
-2. **Deploy Frontend:**
-   - Add Service → Deploy from GitHub
-   - Chọn cùng repo
-   - Root Directory: `frontend`
-   - Railway auto-detect Vite
-   - Deploy!
+### Bước 8: Update CORS (Important!)
 
-### Bước 3: Thêm MongoDB
+1. Quay lại **Backend service** → **Variables**
+2. Update `CORS_ORIGIN`:
+   ```
+   CORS_ORIGIN=https://your-frontend.up.railway.app
+   ```
+3. Hoặc giữ `*` cho development
 
-1. Click **"New"** → **"Database"** → **"Add MongoDB"**
-2. Railway tự động tạo MongoDB instance
-3. Copy connection string từ MongoDB service
-4. Paste vào Backend environment variables
+### Bước 9: Test! 🎉
 
-### Bước 4: Configure Environment Variables
-
-**Backend Service:**
-
-```
-MONGODB_URI=<from Railway MongoDB plugin>
-CORS_ORIGIN=*
-NODE_ENV=production
-PORT=5000
-GRACE_PERIOD_MS=5000
-```
-
-**Frontend Service:**
-
-```
-VITE_API_URL=<backend-url-from-railway>
-VITE_SOCKET_URL=<backend-url-from-railway>
-VITE_APP_NAME=ERP Video Chat Room
-VITE_STUN_SERVERS=stun:stun.l.google.com:19302
-```
-
-### Bước 5: Generate Domain
-
-1. Vào Backend service → **Settings** → **Generate Domain**
-2. Copy URL (vd: `https://your-app.railway.app`)
-3. Paste vào Frontend env: `VITE_API_URL` và `VITE_SOCKET_URL`
-4. Redeploy Frontend
-
-### Bước 6: Done! 🎉
-
-- Frontend URL: `https://your-frontend.railway.app`
-- Backend URL: `https://your-backend.railway.app`
-- Test: Mở frontend URL và tạo room!
+1. Mở frontend URL
+2. Tạo room
+3. Join room
+4. Test video chat!
 
 ---
 
-## 🔧 Railway CLI (Advanced)
+## 🔧 Alternative: Deploy without Docker
 
-### Install CLI
+Nếu Railway báo lỗi với Docker, dùng Nixpacks:
 
-```bash
-npm i -g @railway/cli
-```
+### Backend (No Docker)
 
-### Login
+1. **Xóa hoặc rename** `backend/Dockerfile` → `backend/Dockerfile.bak`
+2. Railway sẽ dùng Nixpacks (auto-detect Node.js)
+3. Settings:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+4. Deploy!
 
-```bash
-railway login
-```
+### Frontend (No Docker)
 
-### Deploy
-
-```bash
-# Deploy all services
-railway up
-
-# Deploy specific service
-railway up --service backend
-railway up --service frontend
-```
-
-### Logs
-
-```bash
-# View logs
-railway logs
-
-# Follow logs
-railway logs -f
-```
-
-### Environment Variables
-
-```bash
-# List variables
-railway variables
-
-# Set variable
-railway variables set MONGODB_URI=mongodb://...
-```
+1. **Xóa hoặc rename** `frontend/Dockerfile` → `frontend/Dockerfile.bak`
+2. Railway sẽ dùng Nixpacks (auto-detect Vite)
+3. Settings:
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npx serve -s dist -l $PORT`
+4. Install serve:
+   ```bash
+   cd frontend
+   npm install --save-dev serve
+   ```
+5. Deploy!
 
 ---
 
-## 📊 Monitoring
+## 📊 Project Structure trong Railway
 
-### View Logs
+Sau khi setup xong, bạn sẽ có:
 
-1. Vào service trong Railway dashboard
-2. Tab **"Deployments"**
-3. Click vào deployment
-4. Xem logs real-time
-
-### Metrics
-
-- CPU usage
-- Memory usage
-- Network traffic
-- Request count
-
-### Alerts
-
-Railway tự động alert khi:
-
-- Service down
-- High memory usage
-- Deployment failed
-
----
-
-## 💰 Pricing
-
-### Free Tier (Hobby Plan)
-
-- $5 credit/month (≈ 500 hours)
-- Unlimited projects
-- Unlimited services
-- 1GB RAM per service
-- 1 vCPU per service
-- 100GB bandwidth
-
-### Usage Estimate
-
-- Backend: ~$3-4/month
-- Frontend: ~$1-2/month
-- MongoDB: ~$2-3/month
-- **Total: ~$6-9/month** (có thể dùng free tier nếu traffic thấp)
-
-### Tips để tiết kiệm
-
-1. Dùng MongoDB Atlas free tier thay vì Railway MongoDB
-2. Deploy frontend lên Vercel (free)
-3. Chỉ deploy backend trên Railway
-
----
-
-## 🔄 Auto Deploy
-
-Railway tự động deploy khi:
-
-- Push code lên GitHub
-- Merge pull request
-- Update environment variables
-
-Disable auto-deploy:
-
-1. Service Settings
-2. Uncheck **"Auto Deploy"**
+```
+My Project
+├── Backend Service (Node.js)
+│   ├── URL: https://backend.up.railway.app
+│   └── Variables: MONGODB_URI, CORS_ORIGIN, etc.
+├── Frontend Service (Static/Nginx)
+│   ├── URL: https://frontend.up.railway.app
+│   └── Variables: VITE_API_URL, VITE_SOCKET_URL, etc.
+└── MongoDB Database
+    └── Connection String: mongodb://...
+```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Service không start
+### Error: "Failed to deploy from source"
 
-```bash
-# Check logs
-railway logs --service backend
+**Nguyên nhân:** Railway không thể build Docker image hoặc detect project type.
 
-# Check environment variables
-railway variables --service backend
+**Fix:**
 
-# Restart service
-railway restart --service backend
+1. **Check Dockerfile syntax**
+
+   ```bash
+   # Test locally
+   cd backend
+   docker build -t test .
+   ```
+
+2. **Check Root Directory**
+
+   - Settings → Root Directory phải đúng (`backend` hoặc `frontend`)
+
+3. **Try Nixpacks instead**
+
+   - Rename Dockerfile → Dockerfile.bak
+   - Railway sẽ auto-detect Node.js/Vite
+
+4. **Check logs**
+   - Deployments tab → Click deployment → View logs
+   - Tìm error message cụ thể
+
+### Error: "Port binding failed"
+
+**Fix:** Ensure backend dùng `process.env.PORT`:
+
+```javascript
+// backend/src/server.js
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 ```
 
-### MongoDB connection failed
+### Error: "MongoDB connection failed"
+
+**Fix:**
 
 1. Check MONGODB_URI format
-2. Whitelist Railway IPs (nếu dùng Atlas)
+2. Ensure MongoDB service đang chạy
 3. Test connection:
    ```bash
    railway run node -e "require('mongoose').connect(process.env.MONGODB_URI)"
    ```
 
-### Frontend không connect được backend
+### Frontend không connect được Backend
 
-1. Check VITE_API_URL và VITE_SOCKET_URL
-2. Ensure backend URL có `https://`
-3. Check CORS settings trong backend
-4. Rebuild frontend sau khi update env
+**Fix:**
 
-### Out of credits
+1. Check VITE_API_URL có `https://` không
+2. Ensure backend đang chạy
+3. Check CORS_ORIGIN trong backend
+4. **Rebuild frontend** sau khi update env variables
 
-1. Upgrade to Pro plan ($20/month)
-2. Hoặc deploy frontend lên Vercel (free)
-3. Optimize resource usage
+### Build quá lâu hoặc timeout
+
+**Fix:**
+
+1. Optimize Dockerfile (use multi-stage build)
+2. Reduce dependencies
+3. Use `.dockerignore`
+4. Try Nixpacks instead
+
+---
+
+## 💰 Cost Estimate
+
+### Free Tier ($5 credit/month)
+
+- Backend: ~$3-4/month
+- Frontend: ~$1-2/month
+- MongoDB: ~$2-3/month
+- **Total: $6-9/month**
+
+### Tips để tiết kiệm:
+
+1. Dùng MongoDB Atlas free tier (thay vì Railway MongoDB)
+2. Deploy frontend lên Vercel (free)
+3. Chỉ backend trên Railway (~$3-4/month)
 
 ---
 
@@ -266,158 +245,108 @@ railway restart --service backend
 
 ### 1. Use Environment Variables
 
-Không hardcode URLs, dùng env variables.
+Không hardcode URLs hoặc secrets.
 
 ### 2. Enable Health Checks
 
-Railway tự động check `/health` endpoint.
+Railway auto-check `/health` endpoint.
 
-### 3. Set Resource Limits
+### 3. Monitor Usage
 
-```toml
-# railway.toml
-[deploy]
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-```
+Check usage dashboard để tránh hết credits.
 
 ### 4. Use MongoDB Atlas
 
 Free tier tốt hơn Railway MongoDB:
 
 - 512MB storage
-- Shared cluster
 - Auto backups
+- Better performance
 
-### 5. Monitor Usage
+### 5. Separate Services
 
-Check usage thường xuyên để tránh hết credits.
+Đừng cố deploy monorepo, tách riêng backend/frontend.
 
 ### 6. Use Custom Domain (Optional)
 
-1. Settings → Custom Domain
-2. Add CNAME record
-3. Railway auto-provision SSL
+Settings → Custom Domain → Add CNAME.
 
 ---
 
-## 🔐 Security
+## 🔄 Auto Deploy
 
-### Environment Variables
+Railway tự động deploy khi:
 
-- Không commit `.env` files
-- Dùng Railway dashboard để set secrets
-- Rotate credentials định kỳ
+- Push to main branch
+- Merge pull request
 
-### CORS
+Disable:
 
-```env
-# Development
-CORS_ORIGIN=*
-
-# Production
-CORS_ORIGIN=https://your-frontend.railway.app
-```
-
-### Rate Limiting
-
-Backend đã có rate limiting middleware.
-
-### HTTPS
-
-Railway tự động enable HTTPS cho tất cả services.
-
----
-
-## 📈 Scaling
-
-### Vertical Scaling
-
-1. Service Settings
-2. Increase RAM/CPU
-3. Redeploy
-
-### Horizontal Scaling (Pro Plan)
-
-1. Add Redis for Socket.io adapter
-2. Deploy multiple backend instances
-3. Use load balancer
-
----
-
-## 🆚 Railway vs Others
-
-| Feature     | Railway    | Vercel     | Render   | Heroku |
-| ----------- | ---------- | ---------- | -------- | ------ |
-| Docker      | ✅         | ❌         | ✅       | ✅     |
-| WebSocket   | ✅         | ❌         | ✅       | ✅     |
-| Free Tier   | $5/mo      | ✅         | ✅       | ❌     |
-| Auto Deploy | ✅         | ✅         | ✅       | ✅     |
-| Ease of Use | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Speed       | Fast       | Fastest    | Medium   | Medium |
-
-**Verdict:** Railway tốt nhất cho full-stack app với WebSocket!
+- Settings → Uncheck **"Auto Deploy"**
 
 ---
 
 ## 📚 Resources
 
-- [Railway Documentation](https://docs.railway.app/)
+- [Railway Docs](https://docs.railway.app/)
 - [Railway Discord](https://discord.gg/railway)
 - [Railway Templates](https://railway.app/templates)
-- [Railway Blog](https://blog.railway.app/)
 
 ---
 
 ## 💡 Pro Tips
 
-1. **Use Railway Templates**: Có sẵn templates cho Node.js + React
-2. **Connect GitHub**: Auto-deploy khi push code
-3. **Use Staging Environment**: Tạo branch `staging` để test
-4. **Monitor Costs**: Check usage dashboard hàng ngày
-5. **Backup Database**: Export MongoDB data định kỳ
-6. **Use CDN**: Serve static assets từ CDN (Cloudflare)
-7. **Optimize Images**: Compress images trước khi deploy
-8. **Enable Caching**: Cache API responses khi có thể
+1. **Use Railway CLI** cho faster deployment
 
----
+   ```bash
+   npm i -g @railway/cli
+   railway login
+   railway up
+   ```
 
-## 🎬 Video Tutorial
+2. **Preview Environments** cho PRs
 
-Coming soon! Subscribe để nhận thông báo.
+   - Settings → Enable PR Deploys
+
+3. **Custom Domains** miễn phí
+
+   - Add CNAME record
+   - Railway auto-provision SSL
+
+4. **Monitor Logs** real-time
+
+   - Deployments → View Logs
+
+5. **Rollback** nếu cần
+   - Click deployment cũ → Redeploy
 
 ---
 
 ## ❓ FAQ
 
-**Q: Railway có free tier không?**
-A: Có, $5 credit/month (≈ 500 hours runtime).
+**Q: Railway có hỗ trợ Docker Compose không?**
+A: Không trực tiếp. Phải deploy từng service riêng.
 
-**Q: Có thể dùng custom domain không?**
-A: Có, miễn phí với SSL auto-provision.
+**Q: Tại sao không dùng docker-compose.yml?**
+A: Railway chỉ support single service per deployment.
 
-**Q: Có giới hạn bandwidth không?**
-A: Free tier: 100GB/month. Pro: Unlimited.
+**Q: Có thể dùng monorepo không?**
+A: Có, nhưng phải set Root Directory cho mỗi service.
+
+**Q: Free tier có đủ không?**
+A: Có, nếu traffic thấp (~500 hours/month).
 
 **Q: Deploy mất bao lâu?**
-A: 2-5 phút cho lần đầu, 1-2 phút cho updates.
-
-**Q: Có thể rollback không?**
-A: Có, click vào deployment cũ và redeploy.
-
-**Q: Hỗ trợ WebSocket không?**
-A: Có, full support cho Socket.io và WebSocket.
+A: 3-5 phút cho lần đầu, 1-2 phút cho updates.
 
 ---
 
 ## 🎉 Kết luận
 
-Railway là lựa chọn tốt nhất để deploy full-stack app với:
+Railway vẫn là lựa chọn tốt, chỉ cần:
 
-- ✅ Setup đơn giản (5 phút)
-- ✅ Hỗ trợ Docker + WebSocket
-- ✅ Free tier hào phóng
-- ✅ Auto-deploy từ GitHub
-- ✅ Monitoring tốt
+1. Deploy 2 services riêng (backend + frontend)
+2. Configure environment variables đúng
+3. Connect services với nhau
 
-**Ready to deploy? Let's go! 🚀**
+**Không phức tạp lắm, chỉ cần làm đúng steps! 🚀**

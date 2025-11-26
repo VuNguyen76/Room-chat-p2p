@@ -1,15 +1,4 @@
-# Railway Configuration - Deploy both frontend and backend
-
-[build]
-builder = "NIXPACKS"
-buildCommand = "echo 'Building services...'"
-
-[deploy]
-startCommand = "echo 'Services deployed via docker-compose'"
-healthcheckPath = "/health"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-
-# Railway will automatically detect docker-compose.yml
-# and create separate services for each container
+# Railway Configuration
+# Note: Railway doesn't support docker-compose directly
+# You need to create separate services for backend and frontend
+# This file is for reference only
