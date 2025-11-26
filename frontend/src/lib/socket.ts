@@ -11,10 +11,14 @@ export function getSocket(): Socket {
     }
 
     socketInstance = io(SOCKET_URL, {
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       timeout: 20000,
       forceNew: false,
       autoConnect: true,
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socketInstance.on("connect_error", (error) => {

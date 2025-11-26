@@ -8,9 +8,12 @@ const signalingHandlers = require('./signalingHandlers');
 function initializeSocket(httpServer) {
     const io = new Server(httpServer, {
         cors: {
-            origin: config.corsOrigin,
+            origin: config.corsOrigin === '*' ? true : config.corsOrigin,
+            methods: ['GET', 'POST'],
             credentials: true
-        }
+        },
+        transports: ['websocket', 'polling'],
+        allowEIO3: true
     });
 
     // Middleware
