@@ -4,7 +4,7 @@ services:
   # Backend Service
   - type: web
     name: video-chat-backend
-    runtime: node
+    env: node
     region: singapore
     plan: free
     rootDir: backend
@@ -25,9 +25,9 @@ services:
     autoDeploy: true
 
   # Frontend Service
-  - type: web
+  - type: static
     name: video-chat-frontend
-    runtime: static
+    env: static
     region: singapore
     plan: free
     rootDir: frontend
