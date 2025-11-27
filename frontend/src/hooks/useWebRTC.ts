@@ -84,11 +84,26 @@ export function useWebRTC(options: UseWebRTCOptions = {}): UseWebRTCReturn {
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log(
+            `[WebRTC] ICE candidate for ${userId}:`,
+            event.candidate.type
+          );
           onIceCandidate?.(userId, event.candidate);
         }
       };
 
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log(
+          `[WebRTC] ICE connection state for ${userId}:`,
+          peerConnection.iceConnectionState
+        );
+      };
+
       peerConnection.onconnectionstatechange = () => {
+        console.log(
+          `[WebRTC] Connection state for ${userId}:`,
+          peerConnection.connectionState
+        );
         if (
           peerConnection.connectionState === "disconnected" ||
           peerConnection.connectionState === "failed" ||

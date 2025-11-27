@@ -7,11 +7,13 @@ export const SOCKET_URL =
 
 // WebRTC Configuration
 export const ICE_SERVERS: RTCIceServer[] = [
-  // STUN servers
+  // STUN servers (multiple for redundancy)
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
   { urls: "stun:stun2.l.google.com:19302" },
   { urls: "stun:stun3.l.google.com:19302" },
+  { urls: "stun:stun4.l.google.com:19302" },
+
   // Free TURN servers from OpenRelay (for cross-network connectivity)
   {
     urls: "turn:openrelay.metered.ca:80",
@@ -28,6 +30,28 @@ export const ICE_SERVERS: RTCIceServer[] = [
     username: "openrelayproject",
     credential: "openrelayproject",
   },
+
+  // Additional free TURN servers (Metered.ca)
+  {
+    urls: "turn:a.relay.metered.ca:80",
+    username: "87a47c722b8e19fee4a1d5e7",
+    credential: "tKUOGXL3pY/xHe+s",
+  },
+  {
+    urls: "turn:a.relay.metered.ca:80?transport=tcp",
+    username: "87a47c722b8e19fee4a1d5e7",
+    credential: "tKUOGXL3pY/xHe+s",
+  },
+  {
+    urls: "turn:a.relay.metered.ca:443",
+    username: "87a47c722b8e19fee4a1d5e7",
+    credential: "tKUOGXL3pY/xHe+s",
+  },
+  {
+    urls: "turns:a.relay.metered.ca:443?transport=tcp",
+    username: "87a47c722b8e19fee4a1d5e7",
+    credential: "tKUOGXL3pY/xHe+s",
+  },
 ];
 
 export const WEBRTC_CONFIG: RTCConfiguration = {
@@ -35,7 +59,16 @@ export const WEBRTC_CONFIG: RTCConfiguration = {
   iceCandidatePoolSize: 10,
   bundlePolicy: "max-bundle", // Bundle all media on single transport (reduces overhead)
   rtcpMuxPolicy: "require", // Multiplex RTP and RTCP on same port
-  iceTransportPolicy: "all", // Use both STUN and TURN
+  iceTransportPolicy: "all", // Use both STUN and TURN (change to "relay" to force TURN only)
+};
+
+// Alternative config to force TURN relay (for testing cross-network)
+export const WEBRTC_CONFIG_RELAY_ONLY: RTCConfiguration = {
+  iceServers: ICE_SERVERS,
+  iceCandidatePoolSize: 10,
+  bundlePolicy: "max-bundle",
+  rtcpMuxPolicy: "require",
+  iceTransportPolicy: "relay", // Force TURN relay only
 };
 
 // Quality presets based on participant count
