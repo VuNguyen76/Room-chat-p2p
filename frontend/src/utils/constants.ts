@@ -5,70 +5,39 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 export const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
-// WebRTC Configuration
+// WebRTC Configuration - Optimized for cross-network connectivity
 export const ICE_SERVERS: RTCIceServer[] = [
-  // STUN servers (multiple for redundancy)
+  // Google STUN servers
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:stun2.l.google.com:19302" },
-  { urls: "stun:stun3.l.google.com:19302" },
-  { urls: "stun:stun4.l.google.com:19302" },
 
-  // Free TURN servers from OpenRelay (for cross-network connectivity)
+  // Twilio TURN servers (most reliable)
   {
-    urls: "turn:openrelay.metered.ca:80",
-    username: "openrelayproject",
-    credential: "openrelayproject",
+    urls: "turn:global.turn.twilio.com:3478?transport=udp",
+    username:
+      "f4b4035eaa76f4a55de5f4351567653ee4ff6fa97b50b6b334fcc1be9c27212d",
+    credential: "w1uxM55V9yVoqyVFjt+mxDBV0F87AUCemaYVQGxsPLw=",
   },
   {
-    urls: "turn:openrelay.metered.ca:443",
-    username: "openrelayproject",
-    credential: "openrelayproject",
+    urls: "turn:global.turn.twilio.com:3478?transport=tcp",
+    username:
+      "f4b4035eaa76f4a55de5f4351567653ee4ff6fa97b50b6b334fcc1be9c27212d",
+    credential: "w1uxM55V9yVoqyVFjt+mxDBV0F87AUCemaYVQGxsPLw=",
   },
   {
-    urls: "turn:openrelay.metered.ca:443?transport=tcp",
-    username: "openrelayproject",
-    credential: "openrelayproject",
-  },
-
-  // Additional free TURN servers (Metered.ca)
-  {
-    urls: "turn:a.relay.metered.ca:80",
-    username: "87a47c722b8e19fee4a1d5e7",
-    credential: "tKUOGXL3pY/xHe+s",
-  },
-  {
-    urls: "turn:a.relay.metered.ca:80?transport=tcp",
-    username: "87a47c722b8e19fee4a1d5e7",
-    credential: "tKUOGXL3pY/xHe+s",
-  },
-  {
-    urls: "turn:a.relay.metered.ca:443",
-    username: "87a47c722b8e19fee4a1d5e7",
-    credential: "tKUOGXL3pY/xHe+s",
-  },
-  {
-    urls: "turns:a.relay.metered.ca:443?transport=tcp",
-    username: "87a47c722b8e19fee4a1d5e7",
-    credential: "tKUOGXL3pY/xHe+s",
+    urls: "turn:global.turn.twilio.com:443?transport=tcp",
+    username:
+      "f4b4035eaa76f4a55de5f4351567653ee4ff6fa97b50b6b334fcc1be9c27212d",
+    credential: "w1uxM55V9yVoqyVFjt+mxDBV0F87AUCemaYVQGxsPLw=",
   },
 ];
 
 export const WEBRTC_CONFIG: RTCConfiguration = {
   iceServers: ICE_SERVERS,
   iceCandidatePoolSize: 10,
-  bundlePolicy: "max-bundle", // Bundle all media on single transport (reduces overhead)
-  rtcpMuxPolicy: "require", // Multiplex RTP and RTCP on same port
-  iceTransportPolicy: "all", // Use both STUN and TURN (change to "relay" to force TURN only)
-};
-
-// Alternative config to force TURN relay (for testing cross-network)
-export const WEBRTC_CONFIG_RELAY_ONLY: RTCConfiguration = {
-  iceServers: ICE_SERVERS,
-  iceCandidatePoolSize: 10,
   bundlePolicy: "max-bundle",
   rtcpMuxPolicy: "require",
-  iceTransportPolicy: "relay", // Force TURN relay only
+  iceTransportPolicy: "all",
 };
 
 // Quality presets based on participant count
@@ -79,7 +48,7 @@ export const QUALITY_PRESETS = {
       height: { ideal: 720, max: 1080 },
       frameRate: { ideal: 30, max: 30 },
     },
-    maxBitrate: 2500000, // 2.5 Mbps
+    maxBitrate: 2500000,
   },
   MEDIUM: {
     video: {
@@ -87,7 +56,7 @@ export const QUALITY_PRESETS = {
       height: { ideal: 480, max: 720 },
       frameRate: { ideal: 24, max: 24 },
     },
-    maxBitrate: 1000000, // 1 Mbps
+    maxBitrate: 1000000,
   },
   LOW: {
     video: {
@@ -95,11 +64,10 @@ export const QUALITY_PRESETS = {
       height: { ideal: 360, max: 480 },
       frameRate: { ideal: 15, max: 20 },
     },
-    maxBitrate: 500000, // 500 Kbps
+    maxBitrate: 500000,
   },
 };
 
-// Get quality preset based on participant count
 export function getQualityPreset(participantCount: number) {
   if (participantCount <= 2) return QUALITY_PRESETS.HIGH;
   if (participantCount <= 4) return QUALITY_PRESETS.MEDIUM;
@@ -119,11 +87,9 @@ export const MEDIA_CONSTRAINTS = {
   },
 };
 
-// Room Configuration
 export const MAX_PARTICIPANTS = 6;
 export const MIN_PARTICIPANTS = 2;
 
-// Media Configuration
 export const VIDEO_CONSTRAINTS = {
   width: { ideal: 1280, max: 1920 },
   height: { ideal: 720, max: 1080 },
@@ -136,29 +102,23 @@ export const AUDIO_CONSTRAINTS = {
   autoGainControl: true,
 };
 
-// UI Configuration
 export const TOAST_DURATION = 3000;
 export const RECONNECT_ATTEMPTS = 3;
 export const RECONNECT_DELAY = 1000;
 
-// Local Storage Keys
 export const STORAGE_KEYS = {
   USER_PREFERENCES: "video-chat-user-prefs",
   LAST_ROOM: "video-chat-last-room",
   MEDIA_SETTINGS: "video-chat-media-settings",
 } as const;
 
-// Socket Events
 export const SOCKET_EVENTS = {
-  // Client to Server
   JOIN_ROOM: "join-room",
   LEAVE_ROOM: "leave-room",
   OFFER: "offer",
   ANSWER: "answer",
   ICE_CANDIDATE: "ice-candidate",
   MESSAGE: "message",
-
-  // Server to Client
   ROOM_JOINED: "room-joined",
   USER_JOINED: "user-joined",
   USER_LEFT: "user-left",
@@ -169,7 +129,6 @@ export const SOCKET_EVENTS = {
   ERROR: "error",
 } as const;
 
-// Error Messages
 export const ERROR_MESSAGES = {
   ROOM_NOT_FOUND: "Room not found",
   ROOM_FULL: "Room is full",
